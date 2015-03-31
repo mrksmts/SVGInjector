@@ -238,39 +238,49 @@
         callback(svg);
         return false;
       }
+      
+      //// EDIT
 
-      var imgId = el.getAttribute('id');
-      if (imgId) {
-        svg.setAttribute('id', imgId);
+      // Set default values
+      var defaults = {
+        'role' : 'img',
+        'aria-labelledby' : 'title'
+      };
+
+      for(var key in defaults) {
+        var name = key,
+          value = defaults[key];
+
+        svg.setAttribute(name, value);
       }
 
-      var imgAlt = el.getAttribute('alt');
-      if (imgAlt) {
-        svg.setAttribute('title', imgAlt);
-        svg.getAttribute('title').setAttribute('id', 'title');
-        svg.setAttribute('aria-labelledby', 'title');
-      }
+      var excludes = ['src'];
+      var replacements = {
+        'alt' : 'title'
+      };
 
-      svg.setAttribute('role', 'img');
+      for (var att, name, value, i = 0, atts = el.attributes, l = atts.length; i < l; i++) {
+          att = atts[i];
+          name = att.nodeName;
+          value = att.nodeValue || '';
+
+          // Exclude not needed attributes
+          if (excludes.indexOf(name) == -1) {
+
+            // Replace specific attributes - For example: alt becomes title
+            if (name in replacements) {
+              name = replacements[name];
+            }
+
+            svg.setAttribute(name, value);
+          }
+      }
 
       // Concat the SVG classes + 'injected-svg' + the img classes
-      var classMerge = [].concat(svg.getAttribute('class') || [], 'injected-svg', el.getAttribute('class') || []).join(' ');
+      var classMerge = [].concat(svg.getAttribute('class') || [], 'injected-svg').join(' ');
       svg.setAttribute('class', uniqueClasses(classMerge));
 
-      var imgStyle = el.getAttribute('style');
-      if (imgStyle) {
-        svg.setAttribute('style', imgStyle);
-      }
-
-      // Copy all the data elements to the svg
-      var imgData = [].filter.call(el.attributes, function (at) {
-        return (/^data-\w[\w\-]*$/).test(at.name);
-      });
-      forEach.call(imgData, function (dataAttr) {
-        if (dataAttr.name && dataAttr.value) {
-          svg.setAttribute(dataAttr.name, dataAttr.value);
-        }
-      });
+      //// EDIT
 
       // Make sure any internally referenced clipPath ids and their
       // clip-path references are unique.
